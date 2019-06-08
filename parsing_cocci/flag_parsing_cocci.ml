@@ -27,5 +27,7 @@ let in_minus = ref false
 
 let debug_parse_cocci = ref false
 
+let graph_ast = ref false
+
 (* When using the parser to generate hardened semantic patches *)
 let generating_mode = ref false
