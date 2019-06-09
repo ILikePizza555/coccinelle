@@ -9,6 +9,103 @@ module FC = Flag_cocci
 module Inc = Includes
 
 (*****************************************************************************)
+(* Helpers *)
+(*****************************************************************************)
+
+(* for fresh identifier information *)
+let adjust_stdin cfiles k =
+  match cfiles with
+    [] -> failwith "no files: not possible"
+  | cfile::_ ->
+      let newin =
+	try
+          let (dir, base, ext) = Common.dbe_of_filename (fst cfile) in
+          let varfile = Common.filename_of_dbe (dir, base, "var") in
+          if ext = "c" && Common.lfile_exists varfile
+          then Some varfile
+          else None
+	with Invalid_argument _ -> None in
+      Common.redirect_stdin_opt newin k
+
+let glimpse_filter2 (_,query,_,_) dir =
+  match query with
+    None -> pr2 "no inferred glimpse keywords"; None
+  | Some queries ->
+      let suffixes = if !Flag.include_headers then ["c";"h"] else ["c"] in
+      let rec loop = function
+	  [] -> None (* error, eg due to pattern too big *)
+	| query::queries ->
+	    Printf.fprintf stderr "%s\n" ("glimpse request = " ^ query);
+	    let command = spf "glimpse -y -H %s -N -W -w '%s'" dir query in
+	    let (glimpse_res,stat) = Common.cmd_to_list_and_status command in
+	    match stat with
+	      Unix.WEXITED(0) | Unix.WEXITED(1) ->
+		Some
+		  (let filelist = glimpse_res +>
+		   List.filter
+		     (fun file ->
+		       List.mem (Common.filesuffix file) suffixes) in
+		   if filelist <> [] then
+		     begin
+		       let firstfile = List.hd filelist in
+		       if Filename.is_relative firstfile ||
+		          Filename.is_implicit firstfile
+		       then
+			 List.map (fun file -> dir ^ Filename.dir_sep ^ file)
+			   filelist
+		       else filelist
+		     end
+		   else []
+		  )
+	    |	_ -> loop queries (* error, eg due to pattern too big *) in
+      loop queries
+
+let glimpse_filter a b  =
+  Common.profile_code "glimpse_filter" (fun () -> glimpse_filter2 a b)
+
+let coccigrep_filter (_,_,query,_) dir =
+  match query with
+    None -> pr2 "no inferred keywords"; None
+  | Some (q1,q2,_) ->
+      let res =
+	Test_parsing_c.get_files dir +>
+	List.filter (Cocci_grep.interpret (q1,q2)) in
+      Printf.eprintf "%d files match\n" (List.length res);
+      Some res
+
+let gitgrep_filter ((_,_,query,_) as x) dir =
+  match query with
+    None -> pr2 "no inferred keywords"; None
+  | Some (_,_,query) ->
+      let suffixes = if !Flag.include_headers then "'*.[ch]'" else "'*.c'" in
+      match Git_grep.interpret dir query suffixes with
+	Some res ->
+	  Printf.eprintf "%d files match\n" (List.length res);
+	  Some res
+      |	None -> coccigrep_filter x dir
+
+let idutils_filter (_,_,_,query) dir =
+  match Id_utils.interpret dir query with
+    None -> None
+  | Some files ->
+      let suffixes = if !Flag.include_headers then ["c";"h"] else ["c"] in
+      Printf.eprintf "%d files match\n" (List.length files);
+      Some
+	(files +>
+	 List.filter
+	   (fun file -> List.mem (Common.filesuffix file) suffixes))
+
+let scanner_to_interpreter = function
+    Flag.Glimpse -> glimpse_filter
+  | Flag.IdUtils -> idutils_filter
+  | Flag.CocciGrep -> coccigrep_filter
+  | Flag.GitGrep -> gitgrep_filter
+  | _ -> failwith "impossible"
+
+(* Returns an Arg.spec that calls a function which sets the action global to name*)
+let set_action (name: string) = Arg.Unit (fun () -> action := name)
+
+(*****************************************************************************)
 (* Flags *)
 (*****************************************************************************)
 
@@ -835,103 +932,6 @@ let long_usage () =
 
 let _ = short_usage_func := short_usage
 let _ = long_usage_func := long_usage
-
-(*****************************************************************************)
-(* Helpers *)
-(*****************************************************************************)
-
-(* for fresh identifier information *)
-let adjust_stdin cfiles k =
-  match cfiles with
-    [] -> failwith "no files: not possible"
-  | cfile::_ ->
-      let newin =
-	try
-          let (dir, base, ext) = Common.dbe_of_filename (fst cfile) in
-          let varfile = Common.filename_of_dbe (dir, base, "var") in
-          if ext = "c" && Common.lfile_exists varfile
-          then Some varfile
-          else None
-	with Invalid_argument _ -> None in
-      Common.redirect_stdin_opt newin k
-
-let glimpse_filter2 (_,query,_,_) dir =
-  match query with
-    None -> pr2 "no inferred glimpse keywords"; None
-  | Some queries ->
-      let suffixes = if !Flag.include_headers then ["c";"h"] else ["c"] in
-      let rec loop = function
-	  [] -> None (* error, eg due to pattern too big *)
-	| query::queries ->
-	    Printf.fprintf stderr "%s\n" ("glimpse request = " ^ query);
-	    let command = spf "glimpse -y -H %s -N -W -w '%s'" dir query in
-	    let (glimpse_res,stat) = Common.cmd_to_list_and_status command in
-	    match stat with
-	      Unix.WEXITED(0) | Unix.WEXITED(1) ->
-		Some
-		  (let filelist = glimpse_res +>
-		   List.filter
-		     (fun file ->
-		       List.mem (Common.filesuffix file) suffixes) in
-		   if filelist <> [] then
-		     begin
-		       let firstfile = List.hd filelist in
-		       if Filename.is_relative firstfile ||
-		          Filename.is_implicit firstfile
-		       then
-			 List.map (fun file -> dir ^ Filename.dir_sep ^ file)
-			   filelist
-		       else filelist
-		     end
-		   else []
-		  )
-	    |	_ -> loop queries (* error, eg due to pattern too big *) in
-      loop queries
-
-let glimpse_filter a b  =
-  Common.profile_code "glimpse_filter" (fun () -> glimpse_filter2 a b)
-
-let coccigrep_filter (_,_,query,_) dir =
-  match query with
-    None -> pr2 "no inferred keywords"; None
-  | Some (q1,q2,_) ->
-      let res =
-	Test_parsing_c.get_files dir +>
-	List.filter (Cocci_grep.interpret (q1,q2)) in
-      Printf.eprintf "%d files match\n" (List.length res);
-      Some res
-
-let gitgrep_filter ((_,_,query,_) as x) dir =
-  match query with
-    None -> pr2 "no inferred keywords"; None
-  | Some (_,_,query) ->
-      let suffixes = if !Flag.include_headers then "'*.[ch]'" else "'*.c'" in
-      match Git_grep.interpret dir query suffixes with
-	Some res ->
-	  Printf.eprintf "%d files match\n" (List.length res);
-	  Some res
-      |	None -> coccigrep_filter x dir
-
-let idutils_filter (_,_,_,query) dir =
-  match Id_utils.interpret dir query with
-    None -> None
-  | Some files ->
-      let suffixes = if !Flag.include_headers then ["c";"h"] else ["c"] in
-      Printf.eprintf "%d files match\n" (List.length files);
-      Some
-	(files +>
-	 List.filter
-	   (fun file -> List.mem (Common.filesuffix file) suffixes))
-
-let scanner_to_interpreter = function
-    Flag.Glimpse -> glimpse_filter
-  | Flag.IdUtils -> idutils_filter
-  | Flag.CocciGrep -> coccigrep_filter
-  | Flag.GitGrep -> gitgrep_filter
-  | _ -> failwith "impossible"
-
-(* Returns an Arg.spec that calls a function which sets the action global to name*)
-let set_action (name: string) = Arg.Unit (fun () -> action := name)
 
 (*****************************************************************************)
 (* File groups *)
