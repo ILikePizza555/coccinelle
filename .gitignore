@@ -66,4 +66,5 @@ description-pak
 /bundles/stdcompat/stdcompat-*/*.mli
 /bundles/stdcompat/doc/
 /bundles/menhirLib/
+/bundles/pcre
 parsing_cocci/parser_cocci_menhir.conflicts
