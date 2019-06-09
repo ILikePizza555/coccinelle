@@ -59,11 +59,6 @@ let mod_distrib   = ref false
 let previous_merges = ref (([], []) : Cocci.merge_vars)
 
 (*****************************************************************************)
-(* Helpers *)
-(*****************************************************************************)
-let set_action (name: string) = Arg.Unit (fun () -> action := name)
-
-(*****************************************************************************)
 (* Profiles *)
 (*****************************************************************************)
 
@@ -934,6 +929,9 @@ let scanner_to_interpreter = function
   | Flag.CocciGrep -> coccigrep_filter
   | Flag.GitGrep -> gitgrep_filter
   | _ -> failwith "impossible"
+
+(* Returns an Arg.spec that calls a function which sets the action global to name*)
+let set_action (name: string) = Arg.Unit (fun () -> action := name)
 
 (*****************************************************************************)
 (* File groups *)
