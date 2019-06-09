@@ -9,4 +9,3 @@ val id_utils_index : string ref
 val in_minus : bool ref
 val debug_parse_cocci : bool ref
 val generating_mode : bool ref
-val graph_ast : bool ref
