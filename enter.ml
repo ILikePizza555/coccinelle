@@ -753,12 +753,11 @@ let other_options = [
     (* -token_c, -parse_c, etc  *)
   ((Common.options_of_actions action (Test_parsing_c.actions())) @
     [
-    (let s = "--parse-cocci"  in s, Arg.Unit (fun () -> action := s),
-    "   <file>");
-    (let s = "--rule-dependencies"  in s, Arg.Unit (fun () -> action := s),
-    "   <file>");
-    (let s = "--compare-c"  in s, Arg.Unit (fun () -> action := s),
-    "   <file1> <file2>");
+    (let s = "--parse-cocci" in s, set_action s,"   <file>");
+    (let s = "--rule-dependencies" in s, set_action s,"   <file>");
+    (let s = "--compare-c" in s, set_action s,"   <file1> <file2>");
+    (let s = "--graph-cocci-ast" in s, set_action s, "   <file1>");
+    (let s = "--graph-c-ast" in s, set_action s, "   <file1>");
     ]);
 ]
 
