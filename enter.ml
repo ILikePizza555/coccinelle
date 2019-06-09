@@ -9,6 +9,56 @@ module FC = Flag_cocci
 module Inc = Includes
 
 (*****************************************************************************)
+(* Flags *)
+(*****************************************************************************)
+
+(* In addition to flags that can be tweaked via -xxx options (cf the
+ * full list of options in "the spatch options" section below), the
+ * spatch program also depends on external files, described in
+ * globals/config.ml, mainly a standard.h and standard.iso file *)
+
+let cocci_file = ref ""
+
+let output_file = ref "" (* resulting code *)
+let tmp_dir = ref "" (* temporary files for parallelism *)
+let aux_file_suffix =
+  ref (None : string option) (* suffix for backup if one is desired *)
+let outplace_modif = ref false (* generates a .cocci_res  *)
+let preprocess = ref false     (* run the C preprocessor before cocci *)
+let compat_mode = ref false
+let ignore_unknown_opt = ref false
+let profile_per_file = ref false
+
+let dir = ref false
+let ignore = ref []
+let file_groups = ref false
+let kbuild_info = ref ""
+
+let macro_file = ref ""
+
+(* test mode *)
+let test_mode = ref false
+let test_all = ref false
+let test_spacing = ref false
+let test_okfailed = ref false
+let test_regression_okfailed = ref false
+let expected_score_file = ref ""
+let expected_spacing_score_file = ref ""
+let allow_update_score_file = ref true
+
+(* action mode *)
+let action = ref ""
+
+(* works with -test but also in "normal" spatch mode *)
+let compare_with_expected = ref (None : string option)
+
+let distrib_index = ref (None : int option)
+let distrib_max   = ref (None : int option)
+let mod_distrib   = ref false
+
+let previous_merges = ref (([], []) : Cocci.merge_vars)
+
+(*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
 
@@ -104,56 +154,6 @@ let scanner_to_interpreter = function
 
 (* Returns an Arg.spec that calls a function which sets the action global to name*)
 let set_action (name: string) = Arg.Unit (fun () -> action := name)
-
-(*****************************************************************************)
-(* Flags *)
-(*****************************************************************************)
-
-(* In addition to flags that can be tweaked via -xxx options (cf the
- * full list of options in "the spatch options" section below), the
- * spatch program also depends on external files, described in
- * globals/config.ml, mainly a standard.h and standard.iso file *)
-
-let cocci_file = ref ""
-
-let output_file = ref "" (* resulting code *)
-let tmp_dir = ref "" (* temporary files for parallelism *)
-let aux_file_suffix =
-  ref (None : string option) (* suffix for backup if one is desired *)
-let outplace_modif = ref false (* generates a .cocci_res  *)
-let preprocess = ref false     (* run the C preprocessor before cocci *)
-let compat_mode = ref false
-let ignore_unknown_opt = ref false
-let profile_per_file = ref false
-
-let dir = ref false
-let ignore = ref []
-let file_groups = ref false
-let kbuild_info = ref ""
-
-let macro_file = ref ""
-
-(* test mode *)
-let test_mode = ref false
-let test_all = ref false
-let test_spacing = ref false
-let test_okfailed = ref false
-let test_regression_okfailed = ref false
-let expected_score_file = ref ""
-let expected_spacing_score_file = ref ""
-let allow_update_score_file = ref true
-
-(* action mode *)
-let action = ref ""
-
-(* works with -test but also in "normal" spatch mode *)
-let compare_with_expected = ref (None : string option)
-
-let distrib_index = ref (None : int option)
-let distrib_max   = ref (None : int option)
-let mod_distrib   = ref false
-
-let previous_merges = ref (([], []) : Cocci.merge_vars)
 
 (*****************************************************************************)
 (* Profiles *)
