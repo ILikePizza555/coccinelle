@@ -14,6 +14,8 @@ scripts/spatch.byte
 *.pyc
 *.d
 *.d.opt
+*.ml_byte
+*.ml_native
 
 *~
 .depend
@@ -63,4 +65,5 @@ description-pak
 /bundles/stdcompat/stdcompat-*/*.ml
 /bundles/stdcompat/stdcompat-*/*.mli
 /bundles/stdcompat/doc/
-/bundles/menhirLib/menhir-20171013/
+/bundles/menhirLib/
+parsing_cocci/parser_cocci_menhir.conflicts
