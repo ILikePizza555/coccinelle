@@ -1630,8 +1630,9 @@ let main arglist =
        Test_parsing_c.test_compare_c file1 file2 (* result = unix code *)
     
     | [file1] when !action == "--graph-cocci-ast" -> 
-       
-    | [file1] when !action == "--graph-c-ast" -> ()
+       Graph_actions.graph_cocci file1
+    | [file1] when !action == "--graph-c-ast" ->
+       Graph_actions.graph_c file1
 
     (* could add the Test_parsing_c.test_actions such as -parse_c & co *)
 
