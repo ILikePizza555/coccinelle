@@ -11,6 +11,7 @@ S parsing_cocci
 S popl
 S popl09
 S python
+S graph
 # Build directories
 B commons
 B commons/ocamlextra
@@ -24,3 +25,4 @@ B parsing_cocci
 B popl
 B popl09
 B python
+B graph
