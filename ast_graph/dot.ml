@@ -16,3 +16,16 @@ type edge = {
     source: string;
     sinks: StringSet.t
 }
+
+exception InvalidEdge of string
+
+let string_of_edge e = 
+    if StringSet.cardinal e.sinks == 0
+        then raise (InvalidEdge "encoutered 0 sinks")
+    else 
+        e.source ^ "->" ^ (
+            if StringSet.cardinal e.sinks == 1
+            then StringSet.choose e.sinks
+            else "{" ^ 
+                (StringSet.fold (fun a c -> a ^ " " ^ c) e.sinks "") ^ 
+            "}")
