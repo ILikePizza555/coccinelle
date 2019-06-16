@@ -27,5 +27,7 @@ let string_of_edge e =
             if StringSet.cardinal e.sinks == 1
             then StringSet.choose e.sinks
             else "{" ^ 
-                (StringSet.fold (fun a c -> a ^ " " ^ c) e.sinks "") ^ 
-            "}")
+                (StringSet.fold (fun a c -> a ^ " \"" ^ c ^ "\"") e.sinks "") ^ 
+            "}\n")
+
+let add_sink sink e = { e with sinks = StringSet.add sink e.sinks }

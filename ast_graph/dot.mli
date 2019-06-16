@@ -16,15 +16,17 @@ type edge = {
 
 val string_of_edge : edge -> string
 
+val add_sink : edge -> string -> edge
+
 type graph = {
     name: string;
     nodes: (string, node) Hashtbl.t;
     edges: edge list;
 }
 
-val add_node : graph -> node -> graph
+val add_node : graph -> node -> unit
 
 (* Adds a new edge connecting the two nodes specified by their ids*)
-val connect : graph -> string -> string -> graph
+val connect : graph -> string -> string -> unit
 
 val string_of_graph : graph -> string
