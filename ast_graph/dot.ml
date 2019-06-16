@@ -19,6 +19,11 @@ type edge = {
 
 exception InvalidEdge of string
 
+let make_edge source sink = {
+    source = source;
+    sinks = StringSet.singleton sink
+}
+
 let string_of_edge e = 
     if StringSet.cardinal e.sinks == 0
         then raise (InvalidEdge "encoutered 0 sinks")

@@ -14,6 +14,8 @@ type edge = {
     sinks: StringSet.t
 }
 
+val make_edge : string -> string -> edge
+
 val string_of_edge : edge -> string
 
 val add_sink : edge -> string -> edge
