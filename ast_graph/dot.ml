@@ -36,3 +36,31 @@ let string_of_edge e =
             "}\n")
 
 let add_sink sink e = { e with sinks = StringSet.add sink e.sinks }
+
+(* Main record type for a graph. 
+
+Note that a nodes in our graph don't strictly have to exist in nodes in order
+to be viewed, thanks to how DOT works. It is enough to simple declare the name
+in the edges. This is why `connect` doesn't check for existance in nodes. 
+The nodes table exists mainly for applying attributes to nodes on the graph. 
+ *)
+type graph = {
+    name: string;
+    nodes: (string, node) Hashtbl.t;
+    edges: (string, edge) Hashtbl.t
+}
+
+let add_node g n =
+    Hashtbl.add g.nodes n.id n
+
+let connect g n_id1 n_id2 =
+    if Hashtbl.mem g.edges n_id1 
+    then (Hashtbl.find g.edges n_id1) |> (add_sink n_id2) |> (Hashtbl.replace g.edges n_id1)
+    else Hashtbl.add g.edges n_id1 (make_edge n_id1 n_id2)
+
+let string_of_graph g =
+    let tab_concat sf = fun _ v acc -> acc ^ "\t" ^ (sf v) in
+    "digraph " ^ g.name ^ "{ \n" ^
+    Hashtbl.fold (tab_concat string_of_node) g.nodes "" ^
+    Hashtbl.fold (tab_concat string_of_edge) g.edges "" ^
+    "}"
