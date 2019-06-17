@@ -1,3 +1,4 @@
+open Common
 module StringSet = Set.Make(String)
 
 type node = {
@@ -74,28 +75,32 @@ let graph_from_c_ast ast graph_name =
         nodes = Hashtbl.create initial_table_size;
         edges = Hashtbl.create initial_table_size;} in
     let open Visitor_c in
+    let open Ast_c in
     let vistor : Visitor_c.visitor_c = {
-        kexpr           = (fun (next, self) expr -> ());
-        kassignOp       = (fun (next, self) op -> ());
-        kbinaryOp       = (fun (next, self) op -> ());
-        kstatement      = (fun (next, self) stmt -> ());
-        ktype           = (fun (next, self) t -> ());
-        kdecl           = (fun (next, self) d  -> ());
-        konedecl        = (fun (next, self) d  -> ());
-        konedecl_opt    = (fun _ (next, self) d  -> ());
-        kparam          = (fun (next, self) d  -> ());
-        kdef            = (fun (next, self) d  -> ());
-        kini            = (fun (next, self) ie  ->());
-        kname           = (fun (next, self) x -> ());
-        kfragment       = (fun (next, self) f  -> ());
-        kformat         = (fun (next, self) f  -> ());
-        kinfo           = (fun (next, self) ii  ->());
-        knode           = (fun (next, self) n  -> ());
-        ktoplevel       = (fun (next, self) p  -> ());
-        kcppdirective   = (fun (next, self) p  -> ());
-        kifdefdirective = (fun (next, self) p  -> ());
-        kdefineval      = (fun (next, self) p  -> ());
-        kstatementseq   = (fun (next, self) p  -> ());
-        kfield          = (fun (next, self) p  -> ());
+        kexpr           = (fun (next, self) expr -> 
+            add_node g (simple_node Ast_name.name_from_expr expr);
+            next expr
+        );
+        kassignOp       = (fun (next, self) op -> next op);
+        kbinaryOp       = (fun (next, self) op -> next op);
+        kstatement      = (fun (next, self) stmt -> next stmt);
+        ktype           = (fun (next, self) t -> next t);
+        kdecl           = (fun (next, self) d  -> next d);
+        konedecl        = (fun (next, self) d  -> next d);
+        konedecl_opt    = (fun _ (next, self) d  -> next d);
+        kparam          = (fun (next, self) d  -> next d);
+        kdef            = (fun (next, self) d  -> next d);
+        kini            = (fun (next, self) ie  -> next ie);
+        kname           = (fun (next, self) x -> next x);
+        kfragment       = (fun (next, self) f  -> next f);
+        kformat         = (fun (next, self) f  -> next f);
+        kinfo           = (fun (next, self) ii  -> next ii);
+        knode           = (fun (next, self) n  -> next node);
+        ktoplevel       = (fun (next, self) p  -> next p);
+        kcppdirective   = (fun (next, self) p  -> next p);
+        kifdefdirective = (fun (next, self) p  -> next p);
+        kdefineval      = (fun (next, self) p  -> next p);
+        kstatementseq   = (fun (next, self) p  -> next p);
+        kfield          = (fun (next, self) p  -> next p);
     } in
     Visitor_c.vk_program vistor ast
