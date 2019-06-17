@@ -64,3 +64,32 @@ let string_of_graph g =
     Hashtbl.fold (tab_concat string_of_node) g.nodes "" ^
     Hashtbl.fold (tab_concat string_of_edge) g.edges "" ^
     "}"
+
+(* Functions for converting ASTs to graphs.*)
+
+(* *)
+let c_graph_vistor : Visitor_c.visitor_c = 
+    let open Visitor_c in {
+        kexpr           = (fun (next, self) expr -> ());
+        kassignOp       = (fun (next, self) op -> ());
+        kbinaryOp       = (fun (next, self) op -> ());
+        kstatement      = (fun (next, self) stmt -> ());
+        ktype           = (fun (next, self) t -> ());
+        kdecl           = (fun (next, self) d  -> ());
+        konedecl        = (fun (next, self) d  -> ());
+        konedecl_opt    = (fun _ (next, self) d  -> ());
+        kparam          = (fun (next, self) d  -> ());
+        kdef            = (fun (next, self) d  -> ());
+        kini            = (fun (next, self) ie  ->());
+        kname           = (fun (next, self) x -> ());
+        kfragment       = (fun (next, self) f  -> ());
+        kformat         = (fun (next, self) f  -> ());
+        kinfo           = (fun (next, self) ii  ->());
+        knode           = (fun (next, self) n  -> ());
+        ktoplevel       = (fun (next, self) p  -> ());
+        kcppdirective   = (fun (next, self) p  -> ());
+        kifdefdirective = (fun (next, self) p  -> ());
+        kdefineval      = (fun (next, self) p  -> ());
+        kstatementseq   = (fun (next, self) p  -> ());
+        kfield          = (fun (next, self) p  -> ());
+    }
