@@ -67,9 +67,14 @@ let string_of_graph g =
 
 (* Functions for converting ASTs to graphs.*)
 
-(* *)
-let c_graph_vistor : Visitor_c.visitor_c = 
-    let open Visitor_c in {
+let graph_from_c_ast ast graph_name =
+    let initial_table_size = 1000 in
+    let g : graph = {
+        name = graph_name; 
+        nodes = Hashtbl.create initial_table_size;
+        edges = Hashtbl.create initial_table_size;} in
+    let open Visitor_c in
+    let vistor : Visitor_c.visitor_c = {
         kexpr           = (fun (next, self) expr -> ());
         kassignOp       = (fun (next, self) op -> ());
         kbinaryOp       = (fun (next, self) op -> ());
@@ -92,4 +97,5 @@ let c_graph_vistor : Visitor_c.visitor_c =
         kdefineval      = (fun (next, self) p  -> ());
         kstatementseq   = (fun (next, self) p  -> ());
         kfield          = (fun (next, self) p  -> ());
-    }
+    } in
+    Visitor_c.vk_program vistor ast
