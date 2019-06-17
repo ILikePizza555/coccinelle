@@ -32,3 +32,7 @@ val add_node : graph -> node -> unit
 val connect : graph -> string -> string -> unit
 
 val string_of_graph : graph -> string
+
+val graph_from_c_ast :  Ast_c.program ->
+                        string ->
+                        graph
