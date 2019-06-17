@@ -17,7 +17,7 @@ endif
 CORE_LIBRARIES := \
 	commons globals parsing_cocci parsing_c
 LIBRARIES := \
-	$(CORE_LIBRARIES) ctl ocaml python engine popl09 extra ast_graph
+	$(CORE_LIBRARIES) ctl ocaml python engine popl09 extra graph_ast
 
 TOOLS := spatch spgen
 
@@ -94,7 +94,7 @@ SOURCES_spgen := \
 	file_transform.ml spgen_interactive.ml spgen_lexer.mll spgen_config.ml \
 	spgen.ml spgen_test.ml main.ml
 
-SOURCES_ast_graph := \
+SOURCES_graph_ast := \
 	graph_actions.ml dot.ml ast_name.ml
 
 PREFIX_spatch :=
