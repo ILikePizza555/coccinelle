@@ -8,10 +8,10 @@ type node = {
 
 let simple_node id = {id = id; attrs = []}
 
-let string_of_node n = 
-    "\"" ^ n.id ^ "\# [" ^
-    List.fold_left (fun acc (k, v) -> acc ^ k ^ "=" ^ v ^ " ") "" n.attrs
-    ^ "]\n"
+let string_of_node n =
+    let attr_str = List.fold_left (fun acc (k, v) ->
+        acc ^ (Printf.sprintf "%s=%s" k v)) "" n.attrs in
+    Printf.sprintf "\"%s\"[%s]" n.id attr_str
 
 type edge = {
     source: string;
