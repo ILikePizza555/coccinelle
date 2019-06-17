@@ -95,7 +95,7 @@ SOURCES_spgen := \
 	spgen.ml spgen_test.ml main.ml
 
 SOURCES_ast_graph := \
-	graph_actions.ml
+	graph_actions.ml dot.ml ast_name.ml
 
 PREFIX_spatch :=
 
